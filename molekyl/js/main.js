@@ -116,6 +116,8 @@ async function init() {
     onRemove(id) { if (busy) return; world.removeAtom(id); engine.removeAtom(id); pruneReported(); inspect(null); checkStable(); updateCoach(); },
   });
 
+  engine.preferBonds = true; // bindingene ligger inne i skallene; klikk på en binding skal bryte den
+
   // ---------- kapittel 0: bygg atomet ----------
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const panel = el('section', 'mv-panel mv-builder'); panel.hidden = true; panel.setAttribute('aria-live', 'polite');
