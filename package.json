@@ -1,0 +1,14 @@
+{
+  "name": "molekylverkstedet",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Molekylverkstedet – 3D-spill der eleven bygger atomer og molekyler (VG1 naturfag/kjemi).",
+  "scripts": {
+    "dev": "node server.mjs",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  }
+}
