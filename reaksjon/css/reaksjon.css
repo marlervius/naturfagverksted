@@ -1,0 +1,206 @@
+/* Reaksjonsverkstedet – bare det nye. Bygger på ../molekyl/css/style.css (tokens og mv-klasser). */
+
+/* ------------------------------------------------------------------ */
+/* Oppsett: ingen periodesystem-dokk; likning og energi nederst        */
+/* ------------------------------------------------------------------ */
+.rx-ui { --rx-bottom-h: 0px; }
+.rx-ui .mv-mission { max-height: calc(100% - var(--rx-bottom-h) - var(--edge) * 3); }
+.rx-ui .mv-inspector { max-height: calc(100% - 72px - var(--rx-bottom-h) - var(--edge) * 2); }
+.rx-ui .mv-inspector .mv-facts--small { display: none; }
+/* toasten ligger midt på, rett over bunnpanelene */
+.rx-ui .mv-dock { left: 50%; bottom: calc(var(--rx-bottom-h) + var(--edge) + 4px); }
+.rx-ui .mv-toast { bottom: 0; max-width: min(560px, calc(100vw - 24px)); }
+
+.rx-bottom {
+  position: absolute; left: var(--edge); right: var(--edge); bottom: var(--edge);
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 12px;
+  pointer-events: none;
+}
+.rx-bottom > .mv-panel { position: relative; }
+.rx-panel[hidden] { display: none; }
+.rx-panel { padding: 12px 16px 14px; overflow-y: auto; scrollbar-width: thin; max-height: calc(100vh - 220px); }
+.rx-eqpanel { max-width: 640px; min-width: 0; }
+.rx-react { width: 330px; flex: none; display: grid; gap: 6px; margin-left: auto; }
+.rx-phase { margin-bottom: 8px; }
+
+/* ------------------------------------------------------------------ */
+/* Likningen med tellere                                               */
+/* ------------------------------------------------------------------ */
+.rx-eqrow { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 10px; }
+.rx-term {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 6px; border-radius: 12px; border: 1px solid transparent;
+}
+.rx-term.is-focus { border: 1.5px dashed var(--good); background: rgba(111, 227, 165, 0.06); }
+.rx-stepper {
+  display: inline-flex; align-items: center;
+  border: 1px solid var(--line-strong); border-radius: 10px;
+  background: rgba(3, 14, 19, 0.45);
+}
+.rx-step {
+  width: 36px; height: 36px; border: 0; background: transparent; color: var(--text);
+  font: 700 20px/1 var(--f-mono); cursor: pointer; border-radius: 9px;
+  touch-action: manipulation;
+}
+.rx-step:hover:not(:disabled) { background: rgba(160, 220, 230, 0.14); }
+.rx-step:disabled { color: rgba(143, 176, 179, 0.35); cursor: default; }
+.rx-k { min-width: 26px; text-align: center; font: 800 22px/1 var(--f-display); font-variant-numeric: tabular-nums; color: var(--text); }
+.rx-f { font-size: 26px; line-height: 1.1; cursor: help; color: #f4fbfb; }
+.rx-op { font: 600 24px/1 var(--f-display); color: var(--muted); padding-bottom: 10px; }
+.rx-arrow { font-size: 28px; color: var(--text-soft); padding: 0 2px 9px; }
+
+/* ferdig likning (react/done og suksesskortet) */
+.rx-eq { display: inline; white-space: normal; overflow-wrap: anywhere; }
+.rx-eq-k { font-weight: 800; margin-right: 1px; }
+.rx-eq-op, .rx-eq-arrow { color: var(--muted); }
+.rx-eq--big { display: block; font-size: 24px; line-height: 1.3; }
+.rx-task { margin-top: 6px; font-size: 15px; line-height: 1.4; color: var(--text-soft); }
+
+/* atomregnskap */
+.rx-ledger-label { margin-top: 12px; margin-bottom: 6px; }
+.rx-ledger { display: flex; flex-wrap: wrap; gap: 6px; }
+.rx-atom {
+  display: inline-flex; align-items: baseline; gap: 6px;
+  padding: 5px 10px; border-radius: 999px;
+  border: 1.5px dashed rgba(255, 143, 107, 0.6);
+  background: rgba(255, 143, 107, 0.06);
+  font: 600 15px/1.2 var(--f-mono); font-variant-numeric: tabular-nums;
+}
+.rx-atom-sym { font: 700 16px/1 var(--f-display); color: var(--text); margin-right: 2px; }
+.rx-atom-rel { color: var(--muted); }
+.rx-atom-mark { font-weight: 800; color: var(--warn); margin-left: 2px; }
+.rx-atom.is-ok { border-style: solid; border-color: rgba(111, 227, 165, 0.6); background: rgba(111, 227, 165, 0.08); }
+.rx-atom.is-ok .rx-atom-mark { color: var(--good); }
+.rx-atom.is-focus { box-shadow: 0 0 0 3px rgba(111, 227, 165, 0.25); border-color: var(--good); animation: rx-pulse 1.6s ease-in-out infinite; }
+@keyframes rx-pulse { 50% { box-shadow: 0 0 0 6px rgba(111, 227, 165, 0.12); } }
+.rx-status { margin-top: 8px; font-size: 15px; line-height: 1.4; color: var(--text-soft); }
+.rx-status.is-ok { color: var(--good); font-weight: 700; }
+.rx-status.is-near { color: var(--text); font-weight: 700; }
+
+.rx-confirm { margin-top: 10px; }
+
+/* ekstra støtte inne i panelene */
+.rx-coach {
+  margin-top: 12px; padding: 10px 12px 12px; display: grid; gap: 8px;
+  border-radius: 11px; border: 1px solid rgba(111, 227, 165, 0.35); background: rgba(111, 227, 165, 0.05);
+}
+.rx-coach .mv-coach-row .mv-btn { height: 36px; }
+
+/* ------------------------------------------------------------------ */
+/* Energi og produkter                                                 */
+/* ------------------------------------------------------------------ */
+.rx-bar { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; align-items: baseline; }
+.rx-bar-name { font-size: 14px; color: var(--text-soft); }
+.rx-bar-val { font: 700 14px/1 var(--f-mono); font-variant-numeric: tabular-nums; }
+.rx-bar-track { grid-column: 1 / -1; height: 10px; border-radius: 5px; background: rgba(160, 220, 230, 0.1); overflow: hidden; }
+.rx-bar-track i { display: block; height: 100%; border-radius: 5px; transition: width .35s ease; }
+.rx-bar.is-in .rx-bar-track i { background: var(--warn); }
+.rx-bar.is-out .rx-bar-track i { background: repeating-linear-gradient(135deg, var(--good) 0 6px, rgba(111, 227, 165, 0.6) 6px 10px); }
+.rx-net { margin-top: 2px; font: 700 17px/1.25 var(--f-display); color: var(--text); }
+.rx-net.is-out { color: var(--good); }
+.rx-net.is-in { color: var(--warn); }
+.rx-note { font-size: 13.5px; line-height: 1.4; color: var(--muted); }
+.rx-products-label { margin-top: 6px; }
+.rx-products { display: flex; flex-wrap: wrap; gap: 6px; }
+.rx-products li {
+  display: inline-flex; align-items: baseline; gap: 7px; padding: 4px 10px; border-radius: 999px;
+  border: 1px solid var(--line); background: rgba(160, 220, 230, 0.05);
+}
+.rx-products li.is-ok { border-color: rgba(111, 227, 165, 0.6); background: rgba(111, 227, 165, 0.08); }
+.rx-products li.is-over { border-color: rgba(255, 143, 107, 0.6); border-style: dashed; }
+.rx-mark { font-weight: 800; color: var(--muted); }
+.rx-products li.is-ok .rx-mark { color: var(--good); }
+.rx-pf { font-size: 18px; }
+.rx-pcount { font: 600 13.5px/1 var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* ------------------------------------------------------------------ */
+/* Suksesskortet: energi og diagram                                    */
+/* ------------------------------------------------------------------ */
+.rx-ui .mv-success-formula.rx-eq { display: block; font-size: 20px; line-height: 1.35; }
+.rx-result { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); display: grid; gap: 8px; }
+.rx-verdict { display: flex; gap: 10px; align-items: flex-start; font-size: 16px; line-height: 1.4; font-weight: 700; }
+.rx-verdict-mark {
+  flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  border: 1.5px solid currentColor; font-size: 15px;
+}
+.rx-verdict.is-out .rx-verdict-mark { color: var(--good); }
+.rx-verdict.is-in .rx-verdict-mark { color: var(--warn); }
+.rx-diagram { width: 100%; max-width: 320px; height: auto; overflow: visible; }
+.rx-d-axis { fill: none; stroke: var(--line-strong); stroke-width: 1.2; }
+.rx-d-curve { fill: none; stroke: var(--muted); stroke-width: 1.6; stroke-dasharray: 4 4; }
+.rx-d-level { fill: none; stroke: var(--text); stroke-width: 3; stroke-linecap: round; }
+.rx-d-arrow { fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.rx-d-arrow.is-out { stroke: var(--good); }
+.rx-d-arrow.is-in { stroke: var(--warn); }
+.rx-d-lbl { fill: var(--muted); font: 600 11px var(--f-body); }
+.rx-d-val { fill: var(--text); font: 700 12px var(--f-mono); }
+
+/* middels brede skjermer: toppfeltet når bort til oppdragskortet – flytt kortet ned */
+@media (min-width: 761px) and (max-width: 1180px) {
+  .rx-ui .mv-mission { top: 68px; max-height: calc(100% - 68px - var(--rx-bottom-h) - var(--edge) * 2); }
+}
+
+/* ------------------------------------------------------------------ */
+/* Mobil og smale skjermer (Chromebook i delt visning, telefon)        */
+/* ------------------------------------------------------------------ */
+@media (max-width: 760px) {
+  .rx-ui { --edge: 8px; }
+  .rx-ui .mv-topbar {
+    left: var(--edge); right: var(--edge); gap: 6px;
+    overflow-x: auto; scrollbar-width: none; pointer-events: auto; padding-bottom: 2px;
+  }
+  .rx-ui .mv-topbar::-webkit-scrollbar { display: none; }
+  .rx-ui .mv-topbar .mv-btn, .rx-ui .mv-seg { height: 36px; flex: none; font-size: 14px; }
+  .rx-ui .mv-topbar .mv-btn { padding: 0 10px; }
+  .rx-ui .mv-mission {
+    top: 52px; left: var(--edge); right: var(--edge); width: auto; padding: 10px 12px;
+    max-height: calc(100% - 52px - var(--rx-bottom-h) - var(--edge) * 3);
+  }
+  .rx-ui .mv-mission .mv-brand, .rx-ui .mv-mission .mv-label, .rx-ui .mv-mission .mv-eyebrow { display: none; }
+  .rx-ui .mv-mission-body { margin-top: 0; padding-top: 0; border-top: 0; }
+  .rx-ui .mv-title { font-size: 19px; }
+  .rx-ui .mv-brief { font-size: 15px; line-height: 1.4; }
+  .rx-ui .mv-title + .mv-brief { margin-top: 4px; }
+  .rx-ui .mv-hint { font-size: 14.5px; margin-top: 8px; padding: 8px 10px; }
+  .rx-ui .mv-mission-foot { margin-top: 8px; }
+  .rx-ui .mv-inspector.is-empty { display: none; }
+  .rx-ui .mv-inspector {
+    top: auto; right: var(--edge); bottom: calc(var(--rx-bottom-h) + var(--edge) * 2);
+    width: 210px; padding: 10px 12px; max-height: 40vh;
+  }
+  .rx-ui .mv-insp-mid { display: none; }
+  .rx-ui .mv-insp-sym { font-size: 40px; min-width: 44px; }
+  .rx-bottom { flex-direction: column; align-items: stretch; gap: 6px; }
+  .rx-panel { padding: 10px 12px; max-height: 34vh; }
+  .rx-eqpanel { max-width: none; }
+  .rx-react { width: auto; margin-left: 0; max-height: 30vh; }
+  .rx-eqpanel.is-static { padding: 8px 12px; }
+  .rx-eqpanel.is-static .rx-phase { margin-bottom: 2px; }
+  .rx-eq--big { font-size: 20px; }
+  .rx-eqpanel.is-static .rx-task { display: none; }
+  .rx-f { font-size: 22px; }
+  .rx-step { width: 30px; height: 34px; font-size: 18px; }
+  .rx-k { min-width: 18px; font-size: 20px; }
+  .rx-term { padding: 3px; gap: 4px; }
+  .rx-eqrow { gap: 4px 4px; }
+  .rx-op { font-size: 20px; }
+  .rx-arrow { font-size: 22px; }
+  .rx-ledger-label { margin-top: 8px; }
+  .rx-ui .mv-success, .rx-ui .mv-levels {
+    left: var(--edge); right: var(--edge); width: auto; top: 52px; max-height: calc(100% - 60px);
+  }
+  .rx-ui .mv-success { padding: 16px; }
+  .rx-ui .mv-success-name { font-size: 26px; }
+  .rx-ui .mv-scrim { padding: 10px; }
+  .rx-ui .mv-predict { padding: 18px 16px; }
+  .rx-ui .mv-predict-q { font-size: 20px; }
+  .rx-ui .mv-options { grid-template-columns: 1fr; }
+  .rx-ui .mv-option { min-height: 50px; font-size: 16px; }
+  .rx-ui .mv-help-steps { grid-template-columns: 1fr; }
+  .rx-ui .mv-quiz .mv-dialog-foot { margin: 16px -16px -18px; padding: 12px 16px 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rx-atom.is-focus { animation: none; }
+  .rx-bar-track i { transition: none; }
+}

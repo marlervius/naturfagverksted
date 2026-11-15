@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { World, sigOfMolecule } from '../js/chem.js';
+import { World, sigOfMolecule } from '../molekyl/js/chem.js';
 import {
   LANGS, ELEMENTS, EL, MOLECULES, LEVELS, TEST_DRAW, TEST_PASS, TESTS, STRINGS, t,
-} from '../js/data.js';
+} from '../molekyl/js/data.js';
 
 const dups = (arr) => arr.filter((x, i) => arr.indexOf(x) !== i);
 

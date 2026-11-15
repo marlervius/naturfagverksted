@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { World, sigOfMolecule } from '../js/chem.js';
-import { EL, MOLECULES } from '../js/data.js';
+import { World, sigOfMolecule } from '../molekyl/js/chem.js';
+import { EL, MOLECULES } from '../molekyl/js/data.js';
 
 let w;
 beforeEach(() => { w = new World(EL); });

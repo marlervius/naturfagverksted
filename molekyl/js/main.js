@@ -68,7 +68,7 @@ async function init() {
   const unlockTo = (n) => { state.unlocked = Math.max(1, Math.min(LEVELS.length, cap(), n)); };
 
   const ui = createUI({
-    root, data, lang: state.lang,
+    root, data, lang: state.lang, home: { href: '../', label: { enkel: 'Alle verksteder', fag: 'Alle verksteder' } },
     handlers: {
       onPick(sym) {
         if (busy || inBuilder()) return;

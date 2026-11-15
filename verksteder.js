@@ -1,0 +1,27 @@
+// Register over verkstedene på Naturfagverkstedet.
+// status: 'klar' = lenke med fremgang, 'kommer' = ikke klikkbart kort.
+export const VERKSTEDER = [
+  { id: 'molekyl', href: 'molekyl/', status: 'klar', storageKey: 'molekylverkstedet.v2', data: './molekyl/js/data.js',
+    title: 'Molekylverkstedet',
+    tagline: 'Bygg atomer, molekyler og ioner. Se hvorfor atomer binder seg til hverandre.',
+    topics: ['Atomer', 'Kovalent binding', 'Ioner'], accent: '#ffd76a' },
+  { id: 'reaksjon', href: 'reaksjon/', status: 'klar', storageKey: 'reaksjonsverkstedet.v1', data: './reaksjon/js/data.js',
+    title: 'Reaksjonsverkstedet',
+    tagline: 'Forutsi hva som skjer når stoffer reagerer. Test svaret og se atomene bytte plass.',
+    topics: ['Kjemiske reaksjoner', 'Balansering', 'Energi'], accent: '#ffd76a' },
+  { id: 'celle', status: 'kommer', title: 'Celleverkstedet',
+    tagline: 'Bygg en celle og styr hva som kommer inn og ut gjennom membranen.',
+    topics: ['Celle', 'Membran', 'Transport'], accent: '#ffd76a' },
+  { id: 'dna', status: 'kommer', title: 'DNA-verkstedet',
+    tagline: 'Bygg dobbeltspiralen og følg veien fra gen til protein.',
+    topics: ['DNA', 'Gener', 'Proteiner'], accent: '#ffd76a' },
+  { id: 'energi', status: 'kommer', title: 'Energiverkstedet',
+    tagline: 'Lag energikjeder fra kilde til forbruker.',
+    topics: ['Energikilder', 'Omforming', 'Virkningsgrad'], accent: '#ffd76a' },
+  { id: 'straling', status: 'kommer', title: 'Strålingsverkstedet',
+    tagline: 'Utforsk stråling, drivhuseffekt og radioaktivitet.',
+    topics: ['Stråling', 'Drivhuseffekt', 'Radioaktivitet'], accent: '#ffd76a' },
+  { id: 'okosystem', status: 'kommer', title: 'Økosystemverkstedet',
+    tagline: 'Bygg et næringsnett og følg bestandene over tid.',
+    topics: ['Næringsnett', 'Bestander', 'Balanse'], accent: '#ffd76a' },
+];

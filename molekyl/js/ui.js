@@ -80,6 +80,7 @@ const ICON = {
   chevUp: 'M6.5 14.5L12 9l5.5 5.5',
   chevDown: 'M6.5 9.5L12 15l5.5-5.5',
   arrow: 'M5 12h13M13 6.5l5.5 5.5-5.5 5.5',
+  home: 'M4 11.5L12 5l8 6.5M6.5 9.8V19h11V9.8',
 };
 function icon(name, cls = 'mv-ico') {
   const svg = s('svg', { class: cls, viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false' });
@@ -144,7 +145,12 @@ function lewisPoints(n, cx, cy, dx, dy, spread) {
 
 // =====================================================================
 
-export function createUI({ root, data, lang, handlers }) {
+// Valgfrie opsjoner (alle bakoverkompatible):
+//   home: { href, label }  – diskret lenke «Alle verksteder» i toppfeltet (label: tekst eller {enkel,fag})
+//   table: false           – ingen periodesystem-dokk (toasten vises fortsatt)
+//   sandbox: false         – ingen «Fri bygging»-knapp
+//   collection: false      – ingen samlingsknapp
+export function createUI({ root, data, lang, handlers, home = null, table = true, sandbox = true, collection = true }) {
   const H = Object.assign(
     { onPick() {}, onLang() {}, onHint() {}, onReset() {}, onLevel() {}, onSandbox() {}, onHover() {} },
     handlers || {},
@@ -197,7 +203,7 @@ export function createUI({ root, data, lang, handlers }) {
   const strip = h('div', { class: 'mv-strip' });
   const tip = h('div', { class: 'mv-tip', role: 'tooltip', id: 'mv-tip', hidden: true });
   tablePanel.append(grid, strip, tip);
-  dock.append(toastBox, dockTab, tablePanel);
+  dock.append(...(table ? [toastBox, dockTab, tablePanel] : [toastBox]));
 
   const cells = new Map();
   const valenceLabel = h('span', { class: 'mv-vrow-text' });
@@ -325,7 +331,7 @@ export function createUI({ root, data, lang, handlers }) {
       }, T('ui.lang.' + l))));
     const levelsBtn = h('button', { type: 'button', class: 'mv-btn', 'data-k': 'top-levels', 'aria-haspopup': 'dialog',
       onclick: () => toggleLevels(levelsBtn) }, icon('levels'), T('ui.levels'));
-    const sandBtn = h('button', { type: 'button', class: 'mv-btn', 'data-k': 'top-sandbox', 'aria-pressed': String(st.level === null),
+    const sandBtn = sandbox && h('button', { type: 'button', class: 'mv-btn', 'data-k': 'top-sandbox', 'aria-pressed': String(st.level === null),
       onclick: () => H.onSandbox() }, icon('molecule'), T('ui.sandbox'));
     const helpBtn = h('button', { type: 'button', class: 'mv-btn mv-btn--icon', 'data-k': 'top-help', 'aria-label': T('ui.help'), title: T('ui.help'),
       onclick: () => showHelp() }, icon('help'));
@@ -333,7 +339,9 @@ export function createUI({ root, data, lang, handlers }) {
     const testBtn = st.test && H.onTest ? h('button', { type: 'button', class: 'mv-btn mv-btn--primary mv-testbtn', 'data-k': 'top-test', onclick: () => H.onTest() }, tx(st.test)) : null;
     const supBtn = H.onSupport ? h('button', { type: 'button', class: 'mv-btn mv-supbtn' + (st.support ? ' is-on' : ''), 'data-k': 'top-support',
       'aria-pressed': String(!!st.support), onclick: () => H.onSupport() }, icon('support'), T('ui.support'), h('span', { class: 'mv-supbtn-state', 'aria-hidden': 'true' })) : null;
-    topbar.replaceChildren(...[testBtn, supBtn, seg, levelsBtn, sandBtn, pathBtn, helpBtn].filter(Boolean));
+    const homeLink = home && home.href ? h('a', { class: 'mv-btn mv-btn--ghost mv-home', href: home.href, 'data-k': 'top-home', style: 'text-decoration:none' },
+      icon('home'), typeof home.label === 'string' ? home.label : tx(home.label)) : null;
+    topbar.replaceChildren(...[testBtn, supBtn, seg, levelsBtn, sandBtn, pathBtn, helpBtn, homeLink].filter(Boolean));
   }
 
   // =================================================================
@@ -494,6 +502,7 @@ export function createUI({ root, data, lang, handlers }) {
   // =================================================================
   let collBtn = null;
   function renderCollection() {
+    if (!collection) return;
     const n = st.collection.length, total = MOLECULES.length;
     collBtn = h('button', { type: 'button', class: 'mv-panel mv-coll-btn', 'data-k': 'coll', 'aria-haspopup': 'dialog',
       onclick: () => toggleCollection() },
@@ -827,7 +836,8 @@ export function createUI({ root, data, lang, handlers }) {
   }
 
   // ---------- success ----------
-  function success({ level, molecule, stars, headline, nextLabel } = {}) {
+  // extra (valgfri): DOM-node(r) som settes inn etter faktaen. molecule.formula kan også være en ferdig DOM-node.
+  function success({ level, molecule, stars, headline, nextLabel, extra } = {}) {
     return new Promise((resolve) => {
       let entry = null;
       const finish = (v) => { closeOverlay(entry); resolve(v); };
@@ -848,11 +858,12 @@ export function createUI({ root, data, lang, handlers }) {
               h('div', { class: 'mv-success-titles' },
                 h('p', { class: 'mv-eyebrow mv-success-eyebrow', text: headline ? tx(headline) : T('ui.success') }),
                 h('h2', { class: 'mv-success-name', id: 'mv-success-name', text: cap(tx(m.name)) }),
-                formulaNode(m.formula, 'mv-formula mv-success-formula'))),
+                m.formula && m.formula.nodeType ? m.formula : formulaNode(m.formula, 'mv-formula mv-success-formula'))),
             h('div', { class: 'mv-success-stars', role: 'img', 'aria-label': `${T('ui.stars')}: ${k} / 3` },
               [0, 1, 2].map((i) => starSvg(i < k, 'mv-star mv-star--lg s' + i))),
             m.shape ? h('dl', { class: 'mv-success-shape' }, h('dt', { text: T('ui.shape') }), h('dd', { text: tx(m.shape) })) : null,
             m.fact ? h('p', { class: 'mv-success-fact', text: tx(m.fact) }) : null,
+            typeof extra === 'function' ? extra() : extra || null,
             level && level.learn ? h('div', { class: 'mv-learn' },
               h('p', { class: 'mv-label', text: T('ui.learned') }), h('p', { class: 'mv-learn-text', text: tx(level.learn) })) : null,
             h('div', { class: 'mv-dialog-foot mv-success-foot' },

@@ -1,9 +1,9 @@
 {
-  "name": "molekylverkstedet",
+  "name": "naturfagverksted",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Molekylverkstedet – 3D-spill der eleven bygger atomer og molekyler (VG1 naturfag/kjemi).",
+  "description": "Naturfagverkstedet – 3D-verksteder for naturfag VG1.",
   "scripts": {
     "dev": "node server.mjs",
     "test": "vitest run"

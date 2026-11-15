@@ -52,6 +52,7 @@ export class Engine {
     this.sticks = new Map();        // "a-b" -> bindingsgruppe
     this.bursts = [];
     this.selected = null; this.hover = null; this.drag = null;
+    this.preferBonds = false; // valgfritt: true = klikk på binding vinner over skallet rundt atomet
     this.spawnCount = 0; this.clock = new THREE.Clock(); this.frameAvg = 16; this.frames = 0; this.lowQ = false;
 
     const renderer = this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -137,7 +138,7 @@ export class Engine {
   _resize() {
     const w = Math.max(2, this.container.clientWidth), h = Math.max(2, this.container.clientHeight);
     this.renderer.setSize(w, h, false); this.composer.setSize(w, h);
-    this.camera.aspect = w / h; this.camera.setViewOffset(w, h, 0, Math.round(h * 0.13), w, h); this.camera.updateProjectionMatrix();
+    this.camera.aspect = w / h; this.camera.setViewOffset(w, h, -(this.viewShiftX || 0), Math.round(h * 0.13), w, h); // viewShiftX: valgfri sideforskyvning i piksler this.camera.updateProjectionMatrix();
   }
 
   _drawLabel(v) {
@@ -184,7 +185,7 @@ export class Engine {
     const need = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(needCanvas), transparent: true, depthWrite: false, depthTest: false }));
     need.scale.setScalar(0.46); need.visible = false; need.renderOrder = 6; this.scene.add(need);
 
-    let pos = at;
+    let pos = at && !at.isVector3 ? new THREE.Vector3(at.x || 0, at.y || 0, at.z || 0) : at; // godtar også {x,y,z}
     if (!pos) {
       const a = this.spawnCount++ * 2.4 + 0.5, rad = 1.5 + (this.spawnCount % 3) * 0.55;
       pos = new THREE.Vector3(Math.cos(a) * rad, 0.6 + Math.sin(a * 1.7) * 1.0, Math.sin(a) * rad * 0.5);
@@ -210,6 +211,9 @@ export class Engine {
     if (this.hover === id) this.hover = null;
     this.sync();
   }
+
+  /** Valgfritt: trekk atomets molekyl mot et punkt {x,y,z} i stedet for midten (null = tilbake til midten). */
+  setAnchor(id, p) { const v = this.vis.get(id); if (v) v.anchor = p ? new THREE.Vector3(p.x || 0, p.y ?? 0.6, p.z || 0) : null; }
 
   clear() { [...this.vis.keys()].forEach((id) => this.removeAtom(id)); this.spawnCount = 0; this.sync(); }
 
@@ -327,6 +331,11 @@ export class Engine {
     const hit = this.ray.intersectObjects(shells, false)[0];
     return hit ? hit.object.userData.atomId : null;
   }
+  _pickCore() {
+    const bodies = []; this.vis.forEach((v) => { v.body.userData.atomId = v.id; bodies.push(v.body); });
+    const hit = this.ray.intersectObjects(bodies, false)[0];
+    return hit ? hit.object.userData.atomId : null;
+  }
   _pickBond() {
     const hits = []; this.sticks.forEach((s) => hits.push(s.hit));
     const hit = this.ray.intersectObjects(hits, false)[0];
@@ -375,6 +384,11 @@ export class Engine {
         const over = this._pickAtom();
         if (this.pointerMoved && over != null && over !== drag.from) { this.selected = null; this.cb.onBond && this.cb.onBond(drag.from, over); }
         else if (!this.pointerMoved) {
+          // valgfritt (preferBonds): klikk på en binding inne i skallet bryter den, med mindre selve atomkjernen er truffet
+          if (this.preferBonds && this.selected == null && this._pickCore() == null) {
+            const s = this._pickBond();
+            if (s) { this.cb.onUnbond && this.cb.onUnbond(s.a, s.b); return; }
+          }
           // klikk–klikk som alternativ til å dra (lettere på styreflate)
           if (this.selected != null && this.selected !== drag.from && this.vis.has(this.selected)) {
             const a = this.selected; this.selected = null; this.cb.onBond && this.cb.onBond(a, drag.from);
@@ -400,8 +414,12 @@ export class Engine {
     for (const v of list) v.force.set(0, 0, 0);
     // ytre krefter virker på hele molekylet (ellers bøyes bindingsvinklene)
     const cN = [], cF = [], cC = [];
-    for (const v of list) { const c = comp.get(v.id); if (!cN[c]) { cN[c] = 0; cF[c] = new THREE.Vector3(); cC[c] = new THREE.Vector3(); } cN[c]++; cC[c].add(v.pos); }
-    cC.forEach((c, i) => { c.multiplyScalar(1 / cN[i]); cF[i].set(-c.x * 0.5, -(c.y - 0.6) * 0.8, -c.z * 0.8).multiplyScalar(cN[i]); });
+    const cA = []; // valgfritt ankerpunkt per komponent (setAnchor); ellers trekkes alt mot midten
+    for (const v of list) { const c = comp.get(v.id); if (!cN[c]) { cN[c] = 0; cF[c] = new THREE.Vector3(); cC[c] = new THREE.Vector3(); } cN[c]++; cC[c].add(v.pos); if (v.anchor) cA[c] = v.anchor; }
+    cC.forEach((c, i) => {
+      const a = cA[i], ax = a ? a.x : 0, ay = a ? a.y : 0.6, az = a ? a.z : 0;
+      c.multiplyScalar(1 / cN[i]); cF[i].set(-(c.x - ax) * 0.5, -(c.y - ay) * 0.8, -(c.z - az) * 0.8).multiplyScalar(cN[i]);
+    });
 
     // frastøting: atomer skal ikke ligge oppå hverandre; ioner med lik ladning skyver hverandre unna
     for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
