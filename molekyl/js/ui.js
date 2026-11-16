@@ -150,7 +150,10 @@ function lewisPoints(n, cx, cy, dx, dy, spread) {
 //   table: false           – ingen periodesystem-dokk (toasten vises fortsatt)
 //   sandbox: false         – ingen «Fri bygging»-knapp
 //   collection: false      – ingen samlingsknapp
-export function createUI({ root, data, lang, handlers, home = null, table = true, sandbox = true, collection = true }) {
+//   inspector: false       – ingen atom-inspektør (verksteder uten atomer)
+//   glyph: () => svg       – eget merkeikon i oppdragskortet og hjelpen (standard: atom-glyfen)
+//   helpArt: (i) => svg    – egne tegninger til de fire hjelpestegene (standard: atom-tegningene)
+export function createUI({ root, data, lang, handlers, home = null, table = true, sandbox = true, collection = true, inspector: showInspector = true, glyph = null, helpArt: customHelpArt = null }) {
   const H = Object.assign(
     { onPick() {}, onLang() {}, onHint() {}, onReset() {}, onLevel() {}, onSandbox() {}, onHover() {} },
     handlers || {},
@@ -190,7 +193,8 @@ export function createUI({ root, data, lang, handlers, home = null, table = true
   const collBtnWrap = h('div', { class: 'mv-collection' });
   const foundBox = h('div', { class: 'mv-found', role: 'status', 'aria-live': 'polite' });
   const layer = h('div', { class: 'mv-layer' });
-  root.append(mission, topbar, inspector, dock, foundBox, collBtnWrap, layer);
+  root.append(...[mission, topbar, showInspector ? inspector : null, dock, foundBox, collBtnWrap, layer].filter(Boolean));
+  const brandMark = () => (glyph ? glyph() : brandGlyph());
 
   // =================================================================
   // Periodesystemet
@@ -351,7 +355,7 @@ export function createUI({ root, data, lang, handlers, home = null, table = true
     const lv = st.level;
     const idx = lv ? LEVELS.findIndex((l) => l.id === lv.id) : -1;
     const total = st.progress.total || LEVELS.length;
-    const brand = h('div', { class: 'mv-brand' }, brandGlyph(), h('span', { class: 'mv-brand-name', text: T('ui.title') }),
+    const brand = h('div', { class: 'mv-brand' }, brandMark(), h('span', { class: 'mv-brand-name', text: T('ui.title') }),
       lv ? h('span', { class: 'mv-count', 'aria-label': `${T('ui.levels')}: ${idx + 1} / ${total}` },
         h('b', { text: String(idx + 1) }), h('span', { text: ' / ' + total })) : null);
 
@@ -692,12 +696,12 @@ export function createUI({ root, data, lang, handlers, home = null, table = true
       onEscape: () => closeOverlay(entry),
       render: () => [
         h('header', { class: 'mv-help-head' },
-          h('div', { class: 'mv-brand' }, brandGlyph(), h('span', { class: 'mv-brand-name', text: T('ui.title') })),
+          h('div', { class: 'mv-brand' }, brandMark(), h('span', { class: 'mv-brand-name', text: T('ui.title') })),
           closeBtn(() => closeOverlay(entry), 'help-x')),
         h('h2', { class: 'mv-dialog-title mv-help-title', id: 'mv-help-title', text: T('ui.help') }),
         h('p', { class: 'mv-help-tag', text: T('ui.tagline') }),
         h('ol', { class: 'mv-help-steps' }, [1, 2, 3, 4].map((n, i) => h('li', null,
-          h('span', { class: 'mv-help-n', text: String(n) }), helpArt(i), h('p', { text: T('ui.howto' + n) })))),
+          h('span', { class: 'mv-help-n', text: String(n) }), customHelpArt ? customHelpArt(i) : helpArt(i), h('p', { text: T('ui.howto' + n) })))),
         h('div', { class: 'mv-dialog-foot' },
           h('button', { type: 'button', class: 'mv-btn mv-btn--primary', 'data-k': 'help-ok', onclick: () => closeOverlay(entry) }, T('ui.close'))),
       ],
