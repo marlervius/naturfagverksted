@@ -1,4 +1,5 @@
 import { VERKSTEDER } from '../verksteder.js';
+import { RESSURSER } from '../ressurser.js';
 
 const S = (inner) => `<svg class="art" viewBox="0 0 200 120" aria-hidden="true" focusable="false">${inner}</svg>`;
 
@@ -40,6 +41,25 @@ const ART = {
     <circle class="f" cx="100" cy="26" r="13"/><circle class="f" cx="50" cy="62" r="11"/><circle class="f" cx="150" cy="62" r="11"/>
     <circle class="yf" cx="34" cy="98" r="8"/><circle class="yf" cx="72" cy="98" r="8"/>
     <circle class="yf" cx="128" cy="98" r="8"/><circle class="yf" cx="168" cy="98" r="8"/>`),
+  // ressurser
+  klima: S(`
+    <path class="s" d="M10 92 Q100 40 190 92"/>
+    <path class="s" d="M10 108 H190"/>
+    <path class="s y" d="M52 14 L74 96"/><path class="s y" d="M66 88 L74 96 L78 85"/>
+    <path class="s" d="M116 98 q6 -10 0 -20 t0 -20 t0 -20"/>
+    <path class="s" d="M140 54 q8 10 0 20 t0 20" stroke-dasharray="1 6"/>
+    <circle class="f" cx="128" cy="62" r="5"/>`),
+  'samfunn-modul3': S(`
+    <path class="s" d="M28 98 L28 52 L70 30 L112 52 L112 98 Z M48 98 V70 H92 V98"/>
+    <path class="s" d="M28 52 H112"/>
+    <circle class="f" cx="150" cy="44" r="13"/><circle class="f" cx="176" cy="60" r="10"/>
+    <path class="s" d="M132 98 q18 -34 36 0 M160 98 q12 -24 28 0"/>
+    <circle class="yf" cx="70" cy="44" r="4"/>`),
+  'samfunn-modul4': S(`
+    <circle class="s" cx="64" cy="60" r="40"/>
+    <path class="s" d="M24 60 H104 M64 20 C44 40 44 80 64 100 M64 20 C84 40 84 80 64 100"/>
+    <path class="s y" d="M126 40 H182 M126 60 H170 M126 80 H178"/>
+    <circle class="yf" cx="64" cy="60" r="4"/>`),
 };
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -104,4 +124,15 @@ for (const v of VERKSTEDER) {
   const c = card(v);
   grid.appendChild(c.li);
   if (c.prog) fillProgress(c).catch(() => {});
+}
+
+// Andre ressurser: vanlige lenkekort, uten fremgang (de lagrer på sin egen måte).
+const more = document.getElementById('more');
+if (more) {
+  for (const r of RESSURSER) {
+    const li = document.createElement('li');
+    li.innerHTML = `<a class="card" href="${esc(r.href)}">${ART[r.id] || ''}<div class="body"><p class="fag">${esc(r.fag)}</p>${bodyHtml(r).replace('<div class="body">', '')}
+      <div class="prog"><span class="cta">Åpne</span></div></div></a>`;
+    more.appendChild(li);
+  }
 }
